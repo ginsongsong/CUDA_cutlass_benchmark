@@ -24,7 +24,7 @@ INT8_Tensor(INT8->INT32 accumulation)<br />
 FP16_Tensor(FP16->FP16 accumulation) <br />
 FP16_32_Tensor(FP16->FP32 accumulation) <br />
 
-*Gemm without Tensor** <br />
+**Gemm without Tensor** <br />
 HGEMM->FP16 GEMM <br />
 SGEMM->FP32 GEMM <br />
 DEGMM->FP64 GEMM <br />
