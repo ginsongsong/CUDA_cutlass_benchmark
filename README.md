@@ -3,7 +3,9 @@
 **This cutlass code will find the best MNK to stress the best performance in different GPU.**
 
 **usage(This script will boost you CPU and GPU clocks):**
->bash run.sh
+>
+make<br />
+bash run.sh
 
 **Result as following.** <br /> <br />
 >[TensorCore FP16(FP16 accumulation) Time and TFLOPS Result]<br />
