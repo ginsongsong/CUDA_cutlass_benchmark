@@ -1,4 +1,4 @@
-# NV_CUTLASS_Stress_FindBestMNK
+# CUDA_cutlass_benchmark
 
 **This cutlass code will find the best MNK to stress the best performance in different GPU.**
 
