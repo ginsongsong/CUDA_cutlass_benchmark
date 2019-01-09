@@ -34,9 +34,9 @@ DEGMM->FP64 GEMM <br />
 **Theoretical FMA for Flops**<br />
 **( number of core * peak freq in graphic clock * instruction per clock) <br />**
 
-| Core/ GPU | Core(streaming processor) | Peak freq | Instruction per clock | Flops | GFlops|
+| Core/ GPU | Core(streaming processor) | Peak freq(GPU) | Instruction per clock | Flops | GFlops|
 | ------------- | ------------- | ------------- | ------------- |------------- | ------------- |
-|Tensor CORE|	640(64)=40960|	1.53(SXM2)|	2|	125337.6	|125.34|
-|FP16|	5120	|1.53(SXM2)|	4|	31334.4|	31.33|
-|FP32|	5120	|1.53(SXM2)|	2|	15667.2|	15.67|
-|FP64|	2560	|1.53(SXM2)|	2	|7833.6	|7.83|
+|Tensor CORE|	640(64)=40960|	1.53(SXM2-V100)|	2|	125337.6	|125.34|
+|FP16|	5120	|1.53(SXM2-V100)|	4|	31334.4|	31.33|
+|FP32|	5120	|1.53(SXM2-V100)|	2|	15667.2|	15.67|
+|FP64|	2560	|1.53(SXM2-V100)|	2	|7833.6	|7.83|
