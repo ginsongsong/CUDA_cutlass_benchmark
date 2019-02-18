@@ -3,12 +3,12 @@
 **This cutlass code will find the best MNK to stress the best performance in different GPU.**
 
 **usage(This script will boost you CPU and GPU clocks):**
->make<br />
+>
+make<br />
 <br />
-<br />
-Find Best MNK Usage         :  ./all_gemm --gemmType=N  --findBest   <br />
-Find Best MNK + Stress Usage:  ./all_gemm --gemmType=N  --autoStress  <br />
-Stress Usage                :  ./all_gemm --gemmType=N  --stress --mn=xxx --k=yyy  <br />
+#Find Best MNK Usage         :  ./all_gemm --gemmType=N  --findBest   <br />
+#Find Best MNK + Stress Usage:  ./all_gemm --gemmType=N  --autoStress  <br />
+#Stress Usage                :  ./all_gemm --gemmType=N  --stress --mn=xxx --k=yyy  <br />
 
 
 **Result as following.** <br /> <br />
