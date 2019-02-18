@@ -1,8 +1,11 @@
 #include <iostream>
+#include <fstream>
 #include <curand.h>
 #include <cublas_v2.h>
 #include <iomanip>
 #include <omp.h>
+//author C.H. Wang
+
 //enable OMP
 //#define OPENMP_ENABLE
 
@@ -74,26 +77,126 @@ void printTime(float cublasTime, int m, int n, int k, float &s_max_tflops, int &
         std::cout << std::setw(15) << std::setprecision(4) << cublasTime << ",";
         std::cout << std::setw(15) << std::setprecision(4) << tflops << "," << std::endl;
 }
-// find mnk
-void findMaxMNK(int argc, char* argv[], int* mnk ){
-    int m,n,k;
-    std::string precision="NULL";
 
+//arguments
+bool parseString(const char* arg, const char* name, std::string& value)
+{
+    size_t n = strlen(name);
+    bool match = arg[0] == '-' && arg[1] == '-' && !strncmp(arg + 2, name, n) && arg[n + 2] == '=';
+    if (match)
+    {
+        value = arg + n + 3;
+        std::cout << name << ": " << value << std::endl;
+    }
+    return match;
+}
+
+bool parseInt(const char* arg, const char* name, int& value)
+{
+    size_t n = strlen(name);
+    bool match = arg[0] == '-' && arg[1] == '-' && !strncmp(arg + 2, name, n) && arg[n + 2] == '=';
+    if (match)
+    {
+        value = atoi(arg + n + 3);
+        std::cout << name << ": " << value << std::endl;
+    }
+    return match;
+}
+
+bool parseBool(const char* arg, const char* name, bool& value)
+{
+    size_t n = strlen(name);
+    bool match = arg[0] == '-' && arg[1] == '-' && !strncmp(arg + 2, name, n);
+    if (match)
+    {
+        std::cout << name << std::endl;
+        value = true;
+    }
+    return match;
+}
+
+bool parseFloat(const char* arg, const char* name, float& value)
+{
+    size_t n = strlen(name);
+    bool match = arg[0] == '-' && arg[1] == '-' && !strncmp(arg + 2, name, n) && arg[n + 2] == '=';
+    if (match)
+    {
+        value = atof(arg + n + 3);
+        std::cout << name << ": " << value << std::endl;
+    }
+    return match;
+}
+//author C.H. Wang
+struct Params
+{	
+	
+    int mn{512};
+    int k{512};
+    int gemmTypes{1};
+    bool findBest{false};
+    bool stress{false};
+    bool autoStress{false};
     
-    // precision = INT8_TENSOR
-    // precision = FP16_TENSOR
-    // precision = FP16_32_TENSOR
-    // precision = FP32_CUDA
-    // precision = FP16_CUDA
-    if (argc == 2 || argc == 3) {
-        precision = argv[1];
+} gParams;
+static void printUsage()
+{
+    printf("\n");
+	printf("Find Best MNK Usage         :  ./all_gemm --gemmType=N  --findBest  \n");
+	printf("Find Best MNK + Stress Usage:  ./all_gemm --gemmType=N  --autoStress  \n");
+	printf("Stress Usage                :  ./all_gemm --gemmType=N  --stress --mn=xxx --k=yyy \n");
+    printf("gemmTypes: FP32_CUDA     =1\n");
+    //author C.h. Wang
+    printf("           FP16_CUDA     =2\n");
+    printf("		   INT8_TENSOR   =3\n");
+    printf("           FP16_TENSOR   =4\n");
+    printf("           FP16_32_TENSOR=5\n");
+   
+
+    fflush(stdout);
+}
+bool parseArgs(int argc, char* argv[])
+{
+    if (argc < 1)
+    {
+        printUsage();
+        return false;
     }
     
+    for (int j = 1; j < argc; j++)
+	{
+		if (parseInt(argv[j], "k", gParams.k)
+				|| parseInt(argv[j], "mn", gParams.mn)
+				|| parseInt(argv[j], "gemmTypes", gParams.gemmTypes)
+				
+				)
+		continue;
+
+		if (parseBool(argv[j], "findBest", gParams.findBest)
+				|| parseBool(argv[j], "stress", gParams.stress)
+				|| parseBool(argv[j], "autoStress", gParams.autoStress) )
+		continue;
+		
+		printf("Unknown argument: %s\n", argv[j]);
+		return false;
+	 }
+    
+    return true;
+}
+
+//arguments end
+
+
+// find mnk
+void findMaxMNK(int argc, char* argv[] ){
+    int m,n,k;
+
+  
+   
     float s_max_tflops = 0;
     int s_max_m_n = 0;
     int s_max_k = 0;
     
-    if (precision == "INT8_TENSOR" || precision == "NULL") {
+    if (gParams.gemmTypes==3 ) {
     std::cout << "[TensorCore INT8(INT32 accumulation) Time and TOPS Result]" << std::endl;
     std::cout << std::setw(7) << "m" << std::setw(7) << "n" << std::setw(7) << "k";
     std::cout << std::setw(15) << "Time (msec)" << std::setw(15) << "TOPS";
@@ -170,7 +273,7 @@ void findMaxMNK(int argc, char* argv[], int* mnk ){
     }
     
 
-    if (precision == "FP16_TENSOR" || precision == "NULL") {
+    if (gParams.gemmTypes==4 ) {
     std::cout << "[TensorCore FP16(FP16 accumulation) Time and TFLOPS Result]" << std::endl;
     std::cout << std::setw(7) << "m" << std::setw(7) << "n" << std::setw(7) << "k";
     std::cout << std::setw(15) << "Time (msec)" << std::setw(15) << "TFLOPS";
@@ -246,7 +349,7 @@ void findMaxMNK(int argc, char* argv[], int* mnk ){
     }
     
  
-    if (precision == "FP16_32_TENSOR" || precision == "NULL") {
+    if (gParams.gemmTypes==5 ) {
     std::cout << "[TensorCore FP16(FP32 accumulation) Time and TFLOPS Result]" << std::endl;
     std::cout << std::setw(7) << "m" << std::setw(7) << "n" << std::setw(7) << "k";
     std::cout << std::setw(15) << "Time (msec)" << std::setw(15) << "TFLOPS";
@@ -319,7 +422,7 @@ void findMaxMNK(int argc, char* argv[], int* mnk ){
 	
     }
 
-    if (precision == "FP32_CUDA" || precision == "NULL") {
+    if (gParams.gemmTypes==1 ) {
     std::cout << "[CUDA core FP32 Time and TFLOPS Result]" << std::endl;
     std::cout << std::setw(7) << "m" << std::setw(7) << "n" << std::setw(7) << "k";
     std::cout << std::setw(15) << "Time (msec)" << std::setw(15) << "TFLOPS";
@@ -396,7 +499,7 @@ void findMaxMNK(int argc, char* argv[], int* mnk ){
     }
     
 
-    if (precision == "FP16_CUDA" || precision == "NULL") {
+    if (gParams.gemmTypes==2 ) {
     std::cout << "[CUDA core FP16 Time and TFLOPS Result]" << std::endl;
     std::cout << std::setw(7) << "m" << std::setw(7) << "n" << std::setw(7) << "k";
     std::cout << std::setw(15) << "Time (msec)" << std::setw(15) << "TFLOPS";
@@ -471,20 +574,22 @@ void findMaxMNK(int argc, char* argv[], int* mnk ){
     std::cout << "[Peak TFLOPS]=" << s_max_tflops << ", m=n="<< s_max_m_n << ", k="<<s_max_k<< std::endl;
     cudaErrCheck(cudaDeviceReset());
     }
-	mnk[0]=s_max_m_n;
-	mnk[1]=s_max_k;
+	gParams.mn=s_max_m_n;
+	gParams.k=s_max_k;
 }
 
+
+
 //Stress
-void stress(int argc, char* argv[], int* mnk ){
-    int m,n,k;
+void stress(int argc, char* argv[] ){
+    
+    int m=gParams.mn;
+    int n=gParams.mn;
+    int k=gParams.k;
+    
 	
 	//setup the mnk
-	m=mnk[0];
-	n=mnk[0];
-	k=mnk[1];
-    std::string precision="NULL";
-	
+
 #ifdef OPENMP_ENABLE
 
 	int num_gpus;
@@ -508,20 +613,13 @@ void stress(int argc, char* argv[], int* mnk ){
 	
 #endif
     
-    // precision = INT8_TENSOR
-    // precision = FP16_TENSOR
-    // precision = FP16_32_TENSOR
-    // precision = FP32_CUDA
-    // precision = FP16_CUDA
-    if (argc == 2 || argc == 3) {
-        precision = argv[1];
-    }
+  
     
     float s_max_tflops = 0;
     int s_max_m_n = 0;
     int s_max_k = 0;
     
-    if (precision == "INT8_TENSOR" || precision == "NULL") {
+    if (gParams.gemmTypes==3) {
     std::cout << "[TensorCore INT8(INT32 accumulation) Time and TOPS Result]" << std::endl;
     std::cout << std::setw(7) << "m" << std::setw(7) << "n" << std::setw(7) << "k";
     std::cout << std::setw(15) << "Time (msec)" << std::setw(15) << "TOPS";
@@ -602,7 +700,7 @@ void stress(int argc, char* argv[], int* mnk ){
 	#endif 
     }
 
-    if (precision == "FP16_TENSOR" || precision == "NULL") {
+    if (gParams.gemmTypes==4 ) {
     std::cout << "[TensorCore FP16(FP16 accumulation) Time and TFLOPS Result]" << std::endl;
     std::cout << std::setw(7) << "m" << std::setw(7) << "n" << std::setw(7) << "k";
     std::cout << std::setw(15) << "Time (msec)" << std::setw(15) << "TFLOPS";
@@ -683,7 +781,7 @@ void stress(int argc, char* argv[], int* mnk ){
     }
     
  
-    if (precision == "FP16_32_TENSOR" || precision == "NULL") {
+    if (gParams.gemmTypes==5) {
     std::cout << "[TensorCore FP16(FP32 accumulation) Time and TFLOPS Result]" << std::endl;
     std::cout << std::setw(7) << "m" << std::setw(7) << "n" << std::setw(7) << "k";
     std::cout << std::setw(15) << "Time (msec)" << std::setw(15) << "TFLOPS";
@@ -761,7 +859,7 @@ void stress(int argc, char* argv[], int* mnk ){
 	
     }
 
-    if (precision == "FP32_CUDA" || precision == "NULL") {
+    if (gParams.gemmTypes==1 ) {
     std::cout << "[CUDA core FP32 Time and TFLOPS Result]" << std::endl;
     std::cout << std::setw(7) << "m" << std::setw(7) << "n" << std::setw(7) << "k";
     std::cout << std::setw(15) << "Time (msec)" << std::setw(15) << "TFLOPS";
@@ -843,7 +941,7 @@ void stress(int argc, char* argv[], int* mnk ){
     }
     
 
-    if (precision == "FP16_CUDA" || precision == "NULL") {
+    if (gParams.gemmTypes==2 ) {
     std::cout << "[CUDA core FP16 Time and TFLOPS Result]" << std::endl;
     std::cout << std::setw(7) << "m" << std::setw(7) << "n" << std::setw(7) << "k";
     std::cout << std::setw(15) << "Time (msec)" << std::setw(15) << "TFLOPS";
@@ -933,14 +1031,37 @@ void stress(int argc, char* argv[], int* mnk ){
 
 int main(int argc, char* argv[]) {
 
+	printf("Find Best MNK Usage         :  ./all_gemm --gemmType=N  --findBest  \n");
+	printf("Find Best MNK + Stress Usage:  ./all_gemm --gemmType=N  --autoStress  \n");
+	printf("Stress Usage                :  ./all_gemm --gemmType=N  --stress --mn=xxx --k=yyy \n");
+	
+    printf("           FP32_CUDA     =1\n");
+    //author C.h. Wang
+    printf("           FP16_CUDA     =2\n");
+    printf("gemmTypes: INT8_TENSOR   =3\n");
+    printf("           FP16_TENSOR   =4\n");
+    printf("           FP16_32_TENSOR=5 \n");
+	if (!parseArgs(argc, argv))
+	return -1;
 
-printf("option 1)Benchmark-> benchmark option 2) Stress in single thread option 3) Stress in multiple thread \n");
-int* mnk=(int*)malloc(sizeof(int)*2); //mnk[0]->mn mnk[1]->k
-
-findMaxMNK(argc,argv,mnk);
-stress(argc,argv,mnk);
-
-free(mnk);
+	
+	if(gParams.findBest)
+	{
+		printf("Starting Find Best MNK\n\n");
+		findMaxMNK(argc,argv);
+		
+	}else if(gParams.stress)
+	{
+		printf("Starting Stress MNK\n\n");
+		stress(argc,argv);
+	}else if(gParams.autoStress)
+	{
+		printf("Starting Find Best MNK\n\n");
+		findMaxMNK(argc,argv);
+		
+		printf("Starting Stress MNK\n\n");
+		stress(argc,argv);
+	}
 
 return 0;
 }
