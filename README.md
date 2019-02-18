@@ -4,10 +4,16 @@
 
 **usage(This script will boost you CPU and GPU clocks):**
 >make<br />
->bash run.sh
+<br />
+<br />
+Find Best MNK Usage         :  ./all_gemm --gemmType=N  --findBest   <br />
+Find Best MNK + Stress Usage:  ./all_gemm --gemmType=N  --autoStress  <br />
+Stress Usage                :  ./all_gemm --gemmType=N  --stress --mn=xxx --k=yyy  <br />
+
 
 **Result as following.** <br /> <br />
->[TensorCore FP16(FP16 accumulation) Time and TFLOPS Result]<br />
+>./all_gemm --gemmType=4  --findBest
+[TensorCore FP16(FP16 accumulation) Time and TFLOPS Result]<br />
     m      n      k          Time (msec)         TFLOPS  <br />
    1024,   1024,   1024,        0.06304,          34.07, <br />
    1024,   1024,   2048,        0.05139,          83.57, <br />
@@ -42,9 +48,4 @@ DEGMM->FP64 GEMM <br />
 |FP64|	2560	|1.53(SXM2-V100)|	2	|7833.6	|7.83|
 
 
-**Usage:**
->
-Find Best MNK Usage         :  ./all_gemm --gemmType=N  --findBest   <br />
-Find Best MNK + Stress Usage:  ./all_gemm --gemmType=N  --autoStress  <br />
-Stress Usage                :  ./all_gemm --gemmType=N  --stress --mn=xxx --k=yyy  <br />
 
