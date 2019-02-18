@@ -40,3 +40,11 @@ DEGMM->FP64 GEMM <br />
 |FP16|	5120	|1.53(SXM2-V100)|	4|	31334.4|	31.33|
 |FP32|	5120	|1.53(SXM2-V100)|	2|	15667.2|	15.67|
 |FP64|	2560	|1.53(SXM2-V100)|	2	|7833.6	|7.83|
+
+
+**Usage:**
+>
+Find Best MNK Usage         :  ./all_gemm --gemmType=N  --findBest   <br />
+Find Best MNK + Stress Usage:  ./all_gemm --gemmType=N  --autoStress  <br />
+Stress Usage                :  ./all_gemm --gemmType=N  --stress --mn=xxx --k=yyy  <br />
+
