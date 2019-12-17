@@ -30,6 +30,7 @@ echo "Set CPU Freq to : $GHZ"
 for ((x=0;x<$(lscpu  | grep On-line | cut -d " " -f6 | cut -d "-" -f2);x++))
 do
  echo  $GHZ > /sys/devices/system/cpu/cpu${x}/cpufreq/scaling_min_freq
+ echo  $GHZ > /sys/devices/system/cpu/cpu${x}/cpufreq/scaling_max_freq
 done
 
 
