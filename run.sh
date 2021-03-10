@@ -27,7 +27,7 @@ GHZ=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq`
 
 #CPU BOOST
 echo "Set CPU Freq to : $GHZ"
-for ((x=0;x<$(lscpu  | grep On-line |  awk '{print $4}'| cut -d "-" -f2 | cut -d "-" -f2);x++))
+for ((x=0;x<$(lscpu  | grep On-line |  awk 'BEGIN {FS="-"}; {print $3}');x++))
 do
  echo  $GHZ > /sys/devices/system/cpu/cpu${x}/cpufreq/scaling_min_freq
  echo  $GHZ > /sys/devices/system/cpu/cpu${x}/cpufreq/scaling_max_freq
